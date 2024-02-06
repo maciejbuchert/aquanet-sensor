@@ -1,8 +1,9 @@
 import string
 import requests
-from urllib.parse import quote, urljoin
+from urllib.parse import quote
 import http.client
 from lxml import etree
+import datetime
 
 from bs4 import BeautifulSoup
 
@@ -57,15 +58,15 @@ class AquanetApi:
             'token': soup.select_one('input[name="csrfp_token"]')['value'],
         }
 
-    def consumptionChart(self) -> string:
+    def consumptionChart(self, point: str) -> string:
         cookie = self.login()
         token = self.getConsumptionChartToken()
 
         payload = {
             "csrfp_token": token,
-            "daterange[from]": "06.02.2024",
-            "daterange[to]": "06.02.2024",
-            "daterange[point]": "362428",
+            "daterange[from]": datetime.datetime.now().strftime('%d-%m-%Y'),
+            "daterange[to]": datetime.datetime.now().strftime('%d-%m-%Y'),
+            "daterange[point]": point,
             "daterange[submit]": "Filtruj"
         }
 
@@ -76,15 +77,17 @@ class AquanetApi:
 
         encoded_payload = encoded_payload[:-1]
 
-        print(encoded_payload)
-        print(self.getHeaders(cookie, 'https://ebok.aquanet.pl/zuzycie/odczyty'))
         conn = http.client.HTTPSConnection("ebok.aquanet.pl")
-        conn.request("POST", "/zuzycie/odczyty", encoded_payload, self.getHeaders(cookie, 'https://ebok.aquanet.pl/zuzycie/odczyty'))
+        conn.request("POST", "/zuzycie/odczyty", encoded_payload,
+                     self.getHeaders(cookie, 'https://ebok.aquanet.pl/zuzycie/odczyty'))
         response = conn.getresponse()
 
         soup = BeautifulSoup(response.read().decode("utf-8"), "html.parser")
         dom = etree.HTML(str(soup))
-        print(dom.xpath('/html/body/div[3]/div[2]/div/div/div[3]/div/table/tbody/tr/td[3]')[0].text)
+        try:
+            dom.xpath('/html/body/div[3]/div[2]/div/div/div[3]/div/table/tbody/tr/td[3]')[0].text
+        except:
+            return None
 
     def getConsumptionChartToken(self) -> string:
         cookie = self.login()
@@ -95,22 +98,22 @@ class AquanetApi:
 
     def getHeaders(self, cookie: str, referer: str = 'https://ebok.aquanet.pl/user/login') -> dict:
         return {
-          'authority': 'ebok.aquanet.pl',
-          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-          'accept-language': 'pl-PL,pl;q=0.9',
-          'cache-control': 'no-cache',
-          'content-type': 'application/x-www-form-urlencoded',
-          'cookie': cookie,
-          'origin': 'https://ebok.aquanet.pl',
-          'pragma': 'no-cache',
-          'referer': referer,
-          'sec-ch-ua': '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
-          'sec-ch-ua-mobile': '?0',
-          'sec-ch-ua-platform': '"macOS"',
-          'sec-fetch-dest': 'document',
-          'sec-fetch-mode': 'navigate',
-          'sec-fetch-site': 'same-origin',
-          'sec-fetch-user': '?1',
-          'upgrade-insecure-requests': '1',
-          'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+            'authority': 'ebok.aquanet.pl',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept-language': 'pl-PL,pl;q=0.9',
+            'cache-control': 'no-cache',
+            'content-type': 'application/x-www-form-urlencoded',
+            'cookie': cookie,
+            'origin': 'https://ebok.aquanet.pl',
+            'pragma': 'no-cache',
+            'referer': referer,
+            'sec-ch-ua': '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"macOS"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'same-origin',
+            'sec-fetch-user': '?1',
+            'upgrade-insecure-requests': '1',
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
         }
