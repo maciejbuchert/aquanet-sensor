@@ -1,0 +1,6 @@
+{
+  "name": "Aquanet Sensor",
+  "domains": ["sensor"],
+  "country": "PL",
+  "render_readme": true
+}

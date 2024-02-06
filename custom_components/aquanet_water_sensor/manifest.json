@@ -1,0 +1,14 @@
+{
+  "domain": "aquanet_water_sensor",
+  "name": "Aquanet water Sensor",
+  "documentation": "https://github.com/maciejbuchert/aquanet-sensor",
+  "issue_tracker": "https://github.com/maciejbuchert/aquanet-sensor/issues",
+  "dependencies": [],
+  "config_flow": true,
+  "codeowners": [
+    "@maciejbuchert"
+  ],
+  "requirements": [],
+  "iot_class": "cloud_polling",
+  "version": "0.0.1"
+}
