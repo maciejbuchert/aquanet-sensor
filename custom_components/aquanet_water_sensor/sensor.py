@@ -20,6 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
+    vol.Required(METER_ID): cv.string,
 })
 SCAN_INTERVAL = timedelta(hours=8)
 
@@ -32,18 +33,7 @@ async def async_setup_entry(
     user = config_entry.data[CONF_USERNAME]
     password = config_entry.data[CONF_PASSWORD]
     api = AquanetApi(user, password)
-    try:
-        pgps = await hass.async_add_executor_job(api.meterList)
-    except Exception:
-        raise ValueError
-
-    for x in pgps.ppg_list:
-        meter_id = x.meter_number
-        async_add_entities(
-            [AquanetSensor(hass, api, meter_id, x.id_local),
-             AquanetInvoiceSensor(hass, api, meter_id, x.id_local),
-             AquanetCostTrackingSensor(hass, api, meter_id, x.id_local)],
-            update_before_add=True)
+    async_add_entities([AquanetSensor(hass, api, config_entry.data[METER_ID])], update_before_add=True)
 
 
 async def async_setup_platform(
@@ -53,8 +43,7 @@ async def async_setup_platform(
         discovery_info: Optional[DiscoveryInfoType] = None,
 ) -> None:
     api = AquanetApi(config.get(CONF_USERNAME), config.get(CONF_PASSWORD))
-    async_add_entities(
-        [AquanetSensor(hass, api, config.get(METER_ID))], update_before_add=True)
+    async_add_entities([AquanetSensor(hass, api, config.get(METER_ID))], update_before_add=True)
 
 
 class AquanetSensor(SensorEntity):
