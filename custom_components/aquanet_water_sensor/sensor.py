@@ -5,6 +5,7 @@ import logging
 import string
 from datetime import timedelta
 from typing import Callable, Optional
+import json
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -73,6 +74,7 @@ class AquanetSensor(SensorEntity):
 
     @property
     def name(self) -> str:
+        _LOGGER.debug(f"{self.unique_id} - call.name: {self.entity_name}")
         return self.entity_name
 
     @property
@@ -81,19 +83,21 @@ class AquanetSensor(SensorEntity):
         if self._state is not None:
             attrs["wear"] = self._state
             attrs["wear_unit_of_measurment"] = UnitOfVolume.CUBIC_METERS
+
+        _LOGGER.debug(f"{self.unique_id} - call.extra_state_attributes: {json.dumps(attrs)}")
         return attrs
 
     @property
     def state(self):
+        _LOGGER.debug(f"{self.unique_id} - call.state: {self._state}")
         if self._state is None:
             return None
         return self._state
 
     async def async_update(self):
-        val = self.latestMeterReading
-        if val is not None:
-            latest_meter_reading = await self.hass.async_add_executor_job(self.latestMeterReading)
-            self._state = latest_meter_reading
+        _LOGGER.debug(f"{self.unique_id} - call.async_update: {self.latestMeterReading}")
+        latest_meter_reading = await self.hass.async_add_executor_job(self.latestMeterReading)
+        self._state = latest_meter_reading
 
     def latestMeterReading(self):
         return self.api.consumptionChart(self.meter_id)
