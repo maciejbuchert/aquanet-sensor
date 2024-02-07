@@ -51,7 +51,7 @@ class AquanetSensor(SensorEntity):
     def __init__(self, hass, api: AquanetApi, meter_id: string) -> None:
         self._attr_native_unit_of_measurement = UnitOfVolume.CUBIC_METERS
         self._state = None
-        self._attr_device_class = SensorDeviceClass.GAS
+        self._attr_device_class = SensorDeviceClass.WATER
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         self.hass = hass
         self.api = api
