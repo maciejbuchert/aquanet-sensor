@@ -14,9 +14,7 @@ from homeassistant.const import CONF_USERNAME, CONF_PASSWORD, VOLUME_CUBIC_METER
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType, HomeAssistantType
 
-from .Invoices import InvoicesList
 from .AquanetApi import AquanetApi
-from .PpgReadingForMeter import MeterReading
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({

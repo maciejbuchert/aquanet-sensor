@@ -3,13 +3,14 @@ from typing import Optional, Dict, Any
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.config_entries import ConfigFlow
-from homeassistant.const import CONF_USERNAME, CONF_PASSWORD
+from homeassistant.const import CONF_USERNAME, CONF_PASSWORD, METER_ID
 
 from custom_components.aquanet_water_sensor.AquanetApi import AquanetApi
 
 AUTH_SCHEMA = vol.Schema({
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
+    vol.Required(METER_ID): cv.string,
 })
 
 

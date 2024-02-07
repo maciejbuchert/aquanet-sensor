@@ -7,7 +7,8 @@
         "description": "This integration will add sensors to get water usage data from Aquanet Sensor. \n\n\n\n {error_info}",
         "data": {
           "username": "Username",
-          "password": "Password"
+          "password": "Password",
+          "meter": "Meter"
         }
       }
     },
