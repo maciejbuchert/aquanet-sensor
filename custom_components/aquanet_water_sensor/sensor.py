@@ -48,6 +48,7 @@ async def async_setup_platform(
 
 class AquanetSensor(SensorEntity):
     def __init__(self, hass, api: AquanetApi, meter_id: string) -> None:
+        self._state = None
         self._attr_device_class = SensorDeviceClass.GAS
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         self.hass = hass
@@ -57,7 +58,7 @@ class AquanetSensor(SensorEntity):
 
     @property
     def unique_id(self) -> str | None:
-        return "aquanet_sensor" + self.meter_id + "_" + str(self.id_local)
+        return "aquanet_sensor" + self.meter_id
 
     @property
     def device_info(self):
