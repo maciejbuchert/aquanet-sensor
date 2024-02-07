@@ -10,7 +10,7 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.sensor import SensorEntity, PLATFORM_SCHEMA, SensorStateClass, SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_USERNAME, CONF_PASSWORD
+from homeassistant.const import CONF_USERNAME, CONF_PASSWORD, UnitOfVolume
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType, HomeAssistantType
 
@@ -48,6 +48,7 @@ async def async_setup_platform(
 
 class AquanetSensor(SensorEntity):
     def __init__(self, hass, api: AquanetApi, meter_id: string) -> None:
+        self._attr_native_unit_of_measurement = UnitOfVolume.CUBIC_METERS
         self._state = None
         self._attr_device_class = SensorDeviceClass.GAS
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
@@ -73,6 +74,14 @@ class AquanetSensor(SensorEntity):
     @property
     def name(self) -> str:
         return self.entity_name
+
+    @property
+    def extra_state_attributes(self):
+        attrs = dict()
+        if self._state is not None:
+            attrs["wear"] = self._state
+            attrs["wear_unit_of_measurment"] = UnitOfVolume.CUBIC_METERS
+        return attrs
 
     @property
     def state(self):
