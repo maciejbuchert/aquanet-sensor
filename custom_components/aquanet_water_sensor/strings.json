@@ -8,7 +8,7 @@
         "data": {
           "username": "Username",
           "password": "Password",
-          "meter": "Meter"
+          "meter_id": "Meter"
         }
       }
     },
