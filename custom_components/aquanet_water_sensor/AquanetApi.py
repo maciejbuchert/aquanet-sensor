@@ -2,9 +2,7 @@ import string
 import requests
 from urllib.parse import quote
 import http.client
-from lxml import etree
-import datetime
-
+from lxml import html, etree
 from bs4 import BeautifulSoup
 
 login_url = "https://ebok.aquanet.pl/user/login"
@@ -60,41 +58,14 @@ class AquanetApi:
 
     def consumptionChart(self, meter_id: str) -> string:
         cookie = self.login()
-        token = self.getConsumptionChartToken()
 
-        payload = {
-            "csrfp_token": token,
-            "daterange[from]": datetime.datetime.now().strftime('%d-%m-%Y'),
-            "daterange[to]": datetime.datetime.now().strftime('%d-%m-%Y'),
-            "daterange[point]": meter_id,
-            "daterange[submit]": "Filtruj"
-        }
+        # conn = http.client.HTTPSConnection("ebok.aquanet.pl")
+        # conn.request("GET", "/zuzycie/odczyty", '', self.getHeaders(cookie, 'https://ebok.aquanet.pl/zuzycie/odczyty'))
+        # response = conn.getresponse()
 
-        encoded_payload = ''
-
-        for key, value in payload.items():
-            encoded_payload += quote(str(key), safe='') + '=' + quote(str(value), safe='') + '&'
-
-        encoded_payload = encoded_payload[:-1]
-
-        conn = http.client.HTTPSConnection("ebok.aquanet.pl")
-        conn.request("POST", "/zuzycie/odczyty", encoded_payload,
-                     self.getHeaders(cookie, 'https://ebok.aquanet.pl/zuzycie/odczyty'))
-        response = conn.getresponse()
-
-        soup = BeautifulSoup(response.read().decode("utf-8"), "html.parser")
-        dom = etree.HTML(str(soup))
-        try:
-            dom.xpath('/html/body/div[3]/div[2]/div/div/div[3]/div/table/tbody/tr/td[3]')[0].text
-        except:
-            return None
-
-    def getConsumptionChartToken(self) -> string:
-        cookie = self.login()
-        response = requests.get(consumption_chart_url, headers=self.getHeaders(cookie))
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        return soup.select_one('input[name="csrfp_token"]')['value']
+        response = requests.get(consumption_chart_url, headers=self.getHeaders(cookie), stream=True)
+        dom = etree.HTML(response.text)
+        return dom.xpath('/html/body/div[3]/div[2]/div/div/div[3]/div/table/tbody/tr/td[3]')[0].text
 
     def getHeaders(self, cookie: str, referer: str = 'https://ebok.aquanet.pl/user/login') -> dict:
         return {
