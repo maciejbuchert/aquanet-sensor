@@ -56,16 +56,13 @@ class AquanetApi:
             'token': soup.select_one('input[name="csrfp_token"]')['value'],
         }
 
-    def consumptionChart(self, meter_id: str) -> string:
+    def consumptionChart(self, meter_id: str) -> float:
         cookie = self.login()
-
-        # conn = http.client.HTTPSConnection("ebok.aquanet.pl")
-        # conn.request("GET", "/zuzycie/odczyty", '', self.getHeaders(cookie, 'https://ebok.aquanet.pl/zuzycie/odczyty'))
-        # response = conn.getresponse()
-
         response = requests.get(consumption_chart_url, headers=self.getHeaders(cookie), stream=True)
         dom = etree.HTML(response.text)
-        return dom.xpath('/html/body/div[3]/div[2]/div/div/div[3]/div/table/tbody/tr/td[3]')[0].text
+        value = dom.xpath('/html/body/div[3]/div[2]/div/div/div[3]/div/table/tbody/tr/td[3]')[0].text
+        value = value.replace(',', '.')
+        return float(value)
 
     def getHeaders(self, cookie: str, referer: str = 'https://ebok.aquanet.pl/user/login') -> dict:
         return {
