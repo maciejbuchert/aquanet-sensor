@@ -10,7 +10,7 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.sensor import SensorEntity, PLATFORM_SCHEMA, SensorStateClass, SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_USERNAME, CONF_PASSWORD, VOLUME_CUBIC_METERS, METER_ID
+from homeassistant.const import CONF_USERNAME, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType, HomeAssistantType
 
@@ -20,7 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
-    vol.Required(METER_ID): cv.string,
+    vol.Required("meter_id"): cv.string,
 })
 SCAN_INTERVAL = timedelta(hours=8)
 
@@ -33,7 +33,7 @@ async def async_setup_entry(
     user = config_entry.data[CONF_USERNAME]
     password = config_entry.data[CONF_PASSWORD]
     api = AquanetApi(user, password)
-    async_add_entities([AquanetSensor(hass, api, config_entry.data[METER_ID])], update_before_add=True)
+    async_add_entities([AquanetSensor(hass, api, config_entry.data["meter_id"])], update_before_add=True)
 
 
 async def async_setup_platform(
@@ -43,15 +43,13 @@ async def async_setup_platform(
         discovery_info: Optional[DiscoveryInfoType] = None,
 ) -> None:
     api = AquanetApi(config.get(CONF_USERNAME), config.get(CONF_PASSWORD))
-    async_add_entities([AquanetSensor(hass, api, config.get(METER_ID))], update_before_add=True)
+    async_add_entities([AquanetSensor(hass, api, config.get("meter_id"))], update_before_add=True)
 
 
 class AquanetSensor(SensorEntity):
     def __init__(self, hass, api: AquanetApi, meter_id: string) -> None:
-        self._attr_native_unit_of_measurement = VOLUME_CUBIC_METERS
         self._attr_device_class = SensorDeviceClass.GAS
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-        self._state: MeterReading | None = None
         self.hass = hass
         self.api = api
         self.meter_id = meter_id
@@ -79,20 +77,12 @@ class AquanetSensor(SensorEntity):
     def state(self):
         if self._state is None:
             return None
-        return self._state.value
-
-    @property
-    def extra_state_attributes(self):
-        attrs = dict()
-        if self._state is not None:
-            attrs["wear"] = self._state.wear
-            attrs["wear_unit_of_measurment"] = VOLUME_CUBIC_METERS
-        return attrs
+        return self._state
 
     async def async_update(self):
         val = self.latestMeterReading
         if val is not None:
-            latest_meter_reading: MeterReading = await self.hass.async_add_executor_job(self.latestMeterReading)
+            latest_meter_reading = await self.hass.async_add_executor_job(self.latestMeterReading)
             self._state = latest_meter_reading
 
     def latestMeterReading(self):

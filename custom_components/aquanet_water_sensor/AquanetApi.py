@@ -58,7 +58,7 @@ class AquanetApi:
             'token': soup.select_one('input[name="csrfp_token"]')['value'],
         }
 
-    def consumptionChart(self, point: str) -> string:
+    def consumptionChart(self, meter_id: str) -> string:
         cookie = self.login()
         token = self.getConsumptionChartToken()
 
@@ -66,7 +66,7 @@ class AquanetApi:
             "csrfp_token": token,
             "daterange[from]": datetime.datetime.now().strftime('%d-%m-%Y'),
             "daterange[to]": datetime.datetime.now().strftime('%d-%m-%Y'),
-            "daterange[point]": point,
+            "daterange[point]": meter_id,
             "daterange[submit]": "Filtruj"
         }
 
