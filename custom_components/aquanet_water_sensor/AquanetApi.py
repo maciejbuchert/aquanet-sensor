@@ -60,7 +60,7 @@ class AquanetApi:
         cookie = self.login()
         response = requests.get(consumption_chart_url, headers=self.getHeaders(cookie), stream=True)
         dom = etree.HTML(response.text)
-        value = dom.xpath('/html/body/div[3]/div[2]/div/div/div[3]/div/table/tbody/tr/td[3]')[0].text
+        value = dom.xpath('/html/body/div[3]/div/div/div/div[3]/div/table/tbody/tr[1]/td[3]')[0].text
         value = value.replace(',', '.')
         return float(value)
 
